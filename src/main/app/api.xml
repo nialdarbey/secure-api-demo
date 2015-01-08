@@ -39,17 +39,14 @@ http://www.mulesoft.org/schema/mule/oauth2-provider http://www.mulesoft.org/sche
     </flow>
     <flow name="api-main" >
         <http:inbound-endpoint exchange-pattern="request-response"  address="http://0.0.0.0:8851/api" doc:name=":8851/api" port="8081"/>
-        <cors:validate config-ref="Cors_Configuration" publicResource="true" acceptsCredentials="false" doc:name="CORS Validate"/>
         <apikit:router config-ref="api-config" doc:name="APIkit Router" />
         <exception-strategy ref="api-apiKitGlobalExceptionMapping" doc:name="Reference Exception Strategy" />
     </flow>
 
     <flow name="get:/{countryCode}/{cityName}/current-weather:api-config" >
-        <mule-ss:http-security-filter realm="mule-realm" securityProviders="security-provider" />
         <http:outbound-endpoint exchange-pattern="request-response"  port="8081" method="GET" endpointnode="HTTP" doc:name="GET: OpenWeather /weather" address="http://api.openweathermap.org/data/2.5/weather?q=#[cityName],#[countryCode]"/>
     </flow>
     <flow name="get:/{countryCode}/{cityName}/forecast:api-config" >
-        <oauth2-provider:validate config-ref="oauth2Provider" doc:name="Validate"/>
         <http:outbound-endpoint exchange-pattern="request-response"  port="8081" method="POST" endpointnode="HTTP" doc:name="GET: OpenWeather /forecast" address="http://api.openweathermap.org/data/2.5/forecast?q=#[cityName],#[countryCode]"/>
     </flow>
 </mule>
