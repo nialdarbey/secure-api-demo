@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns:ldap="http://www.mulesoft.org/schema/mule/ldap"
+	xmlns:https="http://www.mulesoft.org/schema/mule/https" xmlns:tracking="http://www.mulesoft.org/schema/mule/ee/tracking"
+	xmlns:ss="http://www.springframework.org/schema/security"
+	xmlns:mule-ss="http://www.mulesoft.org/schema/mule/spring-security"
+	xmlns:jms="http://www.mulesoft.org/schema/mule/jms" xmlns:wmq="http://www.mulesoft.org/schema/mule/ee/wmq"
+	xmlns:data-mapper="http://www.mulesoft.org/schema/mule/ee/data-mapper"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:mulexml="http://www.mulesoft.org/schema/mule/xml"
+	xmlns:cxf="http://www.mulesoft.org/schema/mule/cxf" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" version="EE-3.5.1"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/spring-security http://www.mulesoft.org/schema/mule/spring-security/current/mule-spring-security.xsd
+http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/xml http://www.mulesoft.org/schema/mule/xml/current/mule-xml.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/wmq http://www.mulesoft.org/schema/mule/ee/wmq/current/mule-wmq-ee.xsd
+http://www.mulesoft.org/schema/mule/cxf http://www.mulesoft.org/schema/mule/cxf/current/mule-cxf.xsd
+http://www.mulesoft.org/schema/mule/ee/data-mapper http://www.mulesoft.org/schema/mule/ee/data-mapper/current/mule-data-mapper.xsd
+http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/mule/ee/tracking/current/mule-tracking-ee.xsd
+http://www.mulesoft.org/schema/mule/jms http://www.mulesoft.org/schema/mule/jms/current/mule-jms.xsd
+http://www.mulesoft.org/schema/mule/https http://www.mulesoft.org/schema/mule/https/current/mule-https.xsd
+http://www.mulesoft.org/schema/mule/ldap http://www.mulesoft.org/schema/mule/ldap/current/mule-ldap.xsd">
+
+	<spring:beans>
+
+		<spring:bean id="security-context-source" class="org.springframework.security.ldap.DefaultSpringSecurityContextSource">
+			<spring:constructor-arg value="${ldap.url}" />
+			<spring:property name="userDn" value="${ldap.authDn}" />
+			<spring:property name="password" value="${ldap.authPassword}" />
+			<spring:property name="baseEnvironmentProperties">
+				<spring:map>
+					<spring:entry key="java.naming.ldap.version" value="3" />
+				</spring:map>
+			</spring:property>
+		</spring:bean>
+
+		<spring:bean id="ldap-user-search" class="org.springframework.security.ldap.search.FilterBasedLdapUserSearch">
+			<spring:constructor-arg index="0" value="${ldap.userSearchBaseDn}" />
+			<spring:constructor-arg index="1" value="${ldap.filter}" />
+			<spring:constructor-arg index="2" ref="security-context-source" />
+			<spring:property name="searchSubtree" value="true" />
+		</spring:bean>
+
+		<spring:bean id="ldap-user-details-context-mapper" class="com.mulesoft.secure.api.demo.UserDetailsContextMapper" />
+
+		<spring:bean id="ldap-auth-provider" class="org.springframework.security.ldap.authentication.LdapAuthenticationProvider">
+			<spring:constructor-arg>
+				<spring:bean class="org.springframework.security.ldap.authentication.BindAuthenticator">
+					<spring:constructor-arg ref="security-context-source" />
+					<spring:property name="userSearch" ref="ldap-user-search"></spring:property>
+				</spring:bean>
+			</spring:constructor-arg>
+			<spring:property name="userDetailsContextMapper" ref="ldap-user-details-context-mapper" />
+		</spring:bean>
+
+		<ss:authentication-manager id="ldap-authentication-manager" alias="ldapAuthManager">
+			<ss:authentication-provider ref="ldap-auth-provider" />
+		</ss:authentication-manager>
+
+	</spring:beans>
+
+	<mule-ss:security-manager>
+		<mule-ss:delegate-security-provider name="security-provider" delegate-ref="ldap-authentication-manager" />
+	</mule-ss:security-manager>
+
+
+</mule>
