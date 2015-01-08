@@ -34,7 +34,7 @@ http://www.mulesoft.org/schema/mule/ee/jdbc http://www.mulesoft.org/schema/mule/
 
 	<oauth2-provider:config port="${https.port}"
 		name="oauth2Provider" accessTokenEndpointPath="access" scopes="READ WRITE"
-		resourceOwnerSecurityProvider-ref="demos-security-provider"
+		resourceOwnerSecurityProvider-ref="security-provider"
 		supportedGrantTypes="IMPLICIT RESOURCE_OWNER_PASSWORD_CREDENTIALS"
 		tokenTtlSeconds="3600" enableRefreshToken="true"
 		authorizationEndpointPath="authorization-code" loginPage="oauth2-provider/login.html"

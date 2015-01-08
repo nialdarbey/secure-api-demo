@@ -10,5 +10,6 @@
 	<classpathentry kind="src" path="src/main/api"/>
 	<classpathentry kind="con" path="MULE_LIB/APIkit/org.mule.tooling.apikit"/>
 	<classpathentry kind="src" path="mappings"/>
+	<classpathentry kind="con" path="MULE_LIB/OAuth provider module/org.mule.tooling.ui.contribution.oauth2-provider.3.5.0"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

@@ -3,4 +3,5 @@
     <name>secure-api-demo</name>
     <description></description>
     <muleExtension name="APIkit" qualifier="org.mule.tooling.apikit"/>
+    <muleExtension name="OAuth provider module" qualifier="org.mule.tooling.ui.contribution.oauth2-provider.3.5.0"/>
 </mule-project>
