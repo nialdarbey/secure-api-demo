@@ -50,6 +50,6 @@ http://www.mulesoft.org/schema/mule/oauth2-provider http://www.mulesoft.org/sche
     </flow>
     <flow name="get:/{countryCode}/{cityName}/forecast:api-config" >
         <oauth2-provider:validate config-ref="oauth2Provider" doc:name="Validate"/>
-        <http:outbound-endpoint exchange-pattern="request-response"  port="8081" method="POST" endpointnode="HTTP" doc:name="GET: OpenWeather /forecast" address="http://api.openweathermap.org/data/2.5/forecast?q=#[cityName],#[countryCode]"/>
+        <http:outbound-endpoint exchange-pattern="request-response"  port="8081" method="GET" endpointnode="HTTP" doc:name="GET: OpenWeather /forecast" address="http://api.openweathermap.org/data/2.5/forecast?q=#[cityName],#[countryCode]"/>
     </flow>
 </mule>
