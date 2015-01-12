@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<mule xmlns:oauth2-provider="http://www.mulesoft.org/schema/mule/oauth2-provider" xmlns:api-platform-gw="http://www.mulesoft.org/schema/mule/api-platform-gw" xmlns:cors="http://www.mulesoft.org/schema/mule/cors" xmlns:tracking="http://www.mulesoft.org/schema/mule/ee/tracking" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/apikit" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:spring="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+<mule xmlns:https="http://www.mulesoft.org/schema/mule/https"
+	xmlns:oauth2-provider="http://www.mulesoft.org/schema/mule/oauth2-provider" xmlns:api-platform-gw="http://www.mulesoft.org/schema/mule/api-platform-gw" xmlns:cors="http://www.mulesoft.org/schema/mule/cors" xmlns:tracking="http://www.mulesoft.org/schema/mule/ee/tracking" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/apikit" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:spring="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/https http://www.mulesoft.org/schema/mule/https/current/mule-https.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
 http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
 http://www.mulesoft.org/schema/mule/apikit http://www.mulesoft.org/schema/mule/apikit/current/mule-apikit.xsd
 http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
@@ -27,18 +29,25 @@ http://www.mulesoft.org/schema/mule/oauth2-provider http://www.mulesoft.org/sche
             <apikit:exception value="org.mule.module.apikit.exception.BadRequestException" />
         </apikit:mapping>
     </apikit:mapping-exception-strategy>
-
+	<https:connector name="httpsConnector" cookieSpec="netscape"
+		validateConnections="true" sendBufferSize="0" receiveBufferSize="0"
+		receiveBacklog="0" clientSoTimeout="10000" serverSoTimeout="10000"
+		socketSoLinger="0" doc:name="HTTP\HTTPS">
+		<service-overrides sessionHandler="org.mule.session.NullSessionHandler" />
+		<https:tls-key-store path="keystore.jks"
+			keyPassword="changeit" storePassword="changeit" />
+	</https:connector>
 	<flow name="console" >
-        <http:inbound-endpoint exchange-pattern="request-response" address="http://0.0.0.0:8850/console" doc:name=":8850/console" port="8081">
+        <https:inbound-endpoint connector-ref="httpsConnector" exchange-pattern="request-response" address="https://0.0.0.0:8850/console" doc:name=":8850/console" port="8081">
         	<mule-ss:http-security-filter realm="mule-realm" securityProviders="security-provider" />
         	<not-filter>
                 <wildcard-filter pattern="/favicon.ico" />
             </not-filter>
-        </http:inbound-endpoint>
+        </https:inbound-endpoint>
         <apikit:console doc:name="APIkit Console" config-ref="api-config"/>
     </flow>
     <flow name="api-main" >
-        <http:inbound-endpoint exchange-pattern="request-response"  address="http://0.0.0.0:8851/api" doc:name=":8851/api" port="8081"/>
+        <https:inbound-endpoint exchange-pattern="request-response"  address="https://0.0.0.0:8851/api" doc:name=":8851/api" port="8081" connector-ref="httpsConnector"/>
         <cors:validate config-ref="Cors_Configuration" publicResource="true" acceptsCredentials="false" doc:name="CORS Validate"/>
         <apikit:router config-ref="api-config" doc:name="APIkit Router" />
         <exception-strategy ref="api-apiKitGlobalExceptionMapping" doc:name="Reference Exception Strategy" />
